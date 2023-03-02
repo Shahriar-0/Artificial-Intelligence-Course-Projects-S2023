@@ -1,5 +1,7 @@
 {
     "cSpell.words": [
+        "astype",
+        "dropna",
         "fillna",
         "linspace",
         "scipy"
