@@ -53,11 +53,12 @@ class OthelloUI:
 
 
 HUMAN, COMPUTER = 1, -1
-
 Move = tuple[int, int]
+TOTAL_TESTS = 20
+
 
 class Othello:
-    def __init__(self, ui, minimax_depth = 1, prune = True):
+    def __init__(self, ui = True, minimax_depth = 1, prune = True):
         self.size = 6
         self.ui = OthelloUI(self.size) if ui else None
         self.board = [[0 for _ in range(self.size)] for _ in range(self.size)]
@@ -72,6 +73,7 @@ class Othello:
         self.BORDER_WEIGHT = 2
         self.TOTAL_WEIGHT = 1
         self.WIN_HEURISTIC = 1000
+        self.seen_nodes = 0
         
     def set_minimax_depth(self, depth: int):
         self.minimax_depth = depth
@@ -138,6 +140,7 @@ class Othello:
         return move
     
     def minimax(self, depth: int, turn: int, alpha: float = -math.inf, beta: float = math.inf) -> tuple[int, Move]:
+        self.seen_nodes += 1
         if self.terminal_test():
             value = self.WIN_HEURISTIC if self.get_winner() == HUMAN else -self.WIN_HEURISTIC
             return value, None
@@ -212,9 +215,6 @@ class Othello:
     
     def count_total(self, player: int) -> int:
         return sum(row.count(player) for row in self.board)
-    
-    def count_empty(self) -> int:
-        return sum(row.count(0) for row in self.board) / 36
         
     def terminal_test(self):
         return len(self.get_valid_moves(HUMAN)) == 0 and len(self.get_valid_moves(COMPUTER)) == 0
@@ -235,9 +235,10 @@ class Othello:
             self.current_turn = -self.current_turn
             if self.ui:
                 self.ui.draw_board(self.board)
-                time.sleep(1)
+                # time.sleep(1)
                 
         winner = self.get_winner()
+        print(self.seen_nodes)
         return winner
     
     def reset(self):
@@ -247,23 +248,29 @@ class Othello:
         self.board[int(self.size / 2) - 1][int(self.size / 2)] = self.board[int(self.size / 2)][
             int(self.size / 2) - 1] = -1
         self.current_turn = random.choice([1, -1])
+        self.seen_nodes = 0
         
-TOTAL_TESTS = 20
-othello = Othello(False)
-win = 0
-time_elapsed = 0
-othello.set_minimax_depth(7)
-
-# othello = Othello(True)
-# othello.play()
-
-for i in range(TOTAL_TESTS):
-    start = time.time()
-    win += (othello.play() == HUMAN)
-    time_elapsed += time.time() - start
-    othello.reset()
-    print(i)
-    
-print(time_elapsed / TOTAL_TESTS)
-    
-print(win / TOTAL_TESTS)
+    def test(self, depth: int, prune: bool = True, num_of_test: int = TOTAL_TESTS) -> tuple[float, float, int]:
+        ui = self.ui
+        self.ui = None
+        
+        win = 0
+        time_elapsed = 0
+        seen_nodes = 0
+        self.set_minimax_depth(depth)
+        self.set_pruning(prune)
+        
+        for _ in range(num_of_test):
+            start = time.time()
+            win += (self.play() == HUMAN)
+            time_elapsed += time.time() - start
+            seen_nodes += self.seen_nodes
+            self.reset()
+            
+        self.ui = ui
+        
+        return time_elapsed / num_of_test, win / num_of_test, seen_nodes / num_of_test      
+        
+        
+othello = Othello()
+othello.test(depth = 5, )
