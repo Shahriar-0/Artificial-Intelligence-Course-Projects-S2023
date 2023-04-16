@@ -1,7 +1,11 @@
+from __future__ import annotations
 import random
 import time
 import turtle
-
+import math
+import time
+from copy import deepcopy
+from enum import Enum
 
 class OthelloUI:
     def __init__(self, board_size = 6, square_size = 60):
@@ -48,6 +52,10 @@ class OthelloUI:
         turtle.update()
 
 
+HUMAN, COMPUTER = 1, -1
+
+Move = tuple[int, int]
+
 class Othello:
     def __init__(self, ui, minimax_depth = 1, prune = True):
         self.size = 6
@@ -60,14 +68,24 @@ class Othello:
         self.current_turn = random.choice([1, -1])
         self.minimax_depth = minimax_depth
         self.prune = prune
+        self.CORNER_WEIGHT = 10
+        self.BORDER_WEIGHT = 2
+        self.TOTAL_WEIGHT = 1
+        self.WIN_HEURISTIC = 1000
+        
+    def set_minimax_depth(self, depth: int):
+        self.minimax_depth = depth
+        
+    def set_pruning(self, prune: bool):
+        self.prune = prune
 
     def get_winner(self):
-        white_count = sum([row.count(1) for row in self.board])
-        black_count = sum([row.count(-1) for row in self.board])
+        white_count = sum([row.count(HUMAN) for row in self.board])
+        black_count = sum([row.count(COMPUTER) for row in self.board])
         if white_count > black_count:
-            return 1
+            return HUMAN
         elif white_count < black_count:
-            return -1
+            return COMPUTER
         else:
             return 0
 
@@ -110,28 +128,104 @@ class Othello:
                         self.board[cx][cy] = player
 
     def get_cpu_move(self):
-        moves = self.get_valid_moves(-1)
+        moves = self.get_valid_moves(COMPUTER)
         if len(moves) == 0:
             return None
         return random.choice(moves)
 
     def get_human_move(self):
-        # TODO
-        # raise NotImplementedError
-        moves = self.get_valid_moves(1)
-        if len(moves) == 0:
-            return None
-        return random.choice(moves)
-
+        value, move = self.minimax(self.minimax_depth, HUMAN)
+        return move
+    
+    def minimax(self, depth: int, turn: int, alpha: float = -math.inf, beta: float = math.inf) -> tuple[int, Move]:
+        if self.terminal_test():
+            value = self.WIN_HEURISTIC if self.get_winner() == HUMAN else -self.WIN_HEURISTIC
+            return value, None
+        
+        if depth <= 0:
+            return self.heuristic(), None
+        
+        backup_board = [[x for x in row] for row in self.board]
+        optimal_move = None
+        
+        if turn == HUMAN and len(self.get_valid_moves(turn)) == 0:
+            turn *= -1
+        
+        if turn == HUMAN:
+            node_value = -math.inf
+            for move in self.get_valid_moves(HUMAN):
+                self.make_move(HUMAN, move)
+                value, successor_move = self.minimax(depth - 1, COMPUTER, alpha, beta)
+                self.board = [[x for x in row] for row in backup_board]
+                if value > node_value:
+                    optimal_move = move
+                    node_value = value
+                    if self.prune and node_value >= beta:
+                        break
+                    alpha = max(alpha, value)
+                
+            return node_value, optimal_move 
+        
+        elif turn == COMPUTER:
+            node_value = math.inf
+            for move in self.get_valid_moves(COMPUTER):
+                self.make_move(COMPUTER, move)
+                value, successor_move = self.minimax(depth - 1, HUMAN, alpha, beta)
+                self.board = [[x for x in row] for row in backup_board]
+                if value < node_value:
+                    optimal_move = move
+                    node_value = value
+                    if self.prune and node_value <= alpha:
+                        break
+                    beta = min(beta, value)
+                    
+            return node_value, optimal_move 
+        
+    def heuristic(self) -> int:
+        human_corners = self.count_corners(HUMAN)
+        computer_corners = self.count_corners(COMPUTER)
+        corners_coefficient = (human_corners - computer_corners) 
+        
+        human_total = self.count_total(HUMAN)
+        computer_total = self.count_total(COMPUTER)
+        total_coefficient = (human_total - computer_total)
+        
+        return self.CORNER_WEIGHT * corners_coefficient + self.TOTAL_WEIGHT * total_coefficient
+            #    self.BORDER_WEIGHT * self.count_empty() * (self.count_borders(HUMAN) - self.count_borders(COMPUTER)) + \
+    
+    def count_corners(self, player: int) -> int:
+        sum = 0
+        sum += self.board[0][0] == player
+        sum += self.board[0][-1] == player
+        sum += self.board[-1][0] == player
+        sum += self.board[-1][-1] == player
+        return sum
+               
+    def count_borders(self, player: int) -> int:
+        sum = 0
+        for i in range(self.size):
+            sum += self.board[0][i] == player
+            sum += self.board[-1][i] == player
+            sum += self.board[i][0] == player
+            sum += self.board[i][-1] == player
+        return sum
+    
+    def count_total(self, player: int) -> int:
+        return sum(row.count(player) for row in self.board)
+    
+    def count_empty(self) -> int:
+        return sum(row.count(0) for row in self.board) / 36
+        
     def terminal_test(self):
-        return len(self.get_valid_moves(1)) == 0 and len(self.get_valid_moves(-1)) == 0
+        return len(self.get_valid_moves(HUMAN)) == 0 and len(self.get_valid_moves(COMPUTER)) == 0
 
     def play(self):
         winner = None
+        none_count = 0
         while not self.terminal_test():
             if self.ui:
                 self.ui.draw_board(self.board)
-            if self.current_turn == 1:
+            if self.current_turn == HUMAN:
                 move = self.get_human_move()
                 if move:
                     self.make_move(self.current_turn, move)
@@ -143,8 +237,51 @@ class Othello:
             if self.ui:
                 self.ui.draw_board(self.board)
                 time.sleep(1)
+            
+            if move is None:
+                none_count += 1
+            else: 
+                none_count = 0
+                
+            if none_count >= 2:
+                print("shit")
+                
+            # global file
+            # file.write(str(self.board).encode('utf8'))
+            # file.write(f"{move}\n----------------------------------------------------------\n".encode('utf8'))
         winner = self.get_winner()
         return winner
+    
+    def reset(self):
+        self.board = [[0 for _ in range(self.size)] for _ in range(self.size)]
+        self.board[int(self.size / 2) - 1][int(self.size / 2) - 1] = self.board[int(self.size / 2)][
+            int(self.size / 2)] = 1
+        self.board[int(self.size / 2) - 1][int(self.size / 2)] = self.board[int(self.size / 2)][
+            int(self.size / 2) - 1] = -1
+        self.current_turn = random.choice([1, -1])
+        
+TOTAL_TESTS = 5000
+win = 0
+# othello = Othello(True)
+# othello.set_minimax_depth(3)
+# win += othello.play()
 
-othello = Othello(True)
-othello.play()
+othello = Othello(False)
+time_elapsed = 0
+othello.set_minimax_depth(3)
+
+# othello = Othello(True)
+
+for i in range(TOTAL_TESTS):
+    # file = open("file.txt", "wb")
+    # file.write(f"---------------------{i}------------------------\n".encode('utf8'))
+    # othello.board = [[1, -1, -1, 1, 1, 1], [1, -1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 0], [1, 1, 1, 1, -1, 1]]
+    start = time.time()
+    win += (othello.play() == HUMAN)
+    time_elapsed += time.time() - start
+    othello.reset()
+    print(i)
+    
+print(time_elapsed / TOTAL_TESTS)
+    
+print(win / TOTAL_TESTS)
