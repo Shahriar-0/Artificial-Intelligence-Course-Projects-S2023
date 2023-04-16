@@ -14,7 +14,7 @@ class OthelloUI:
         self.screen = turtle.Screen()
         self.screen.setup(self.board_size * self.square_size + 50, self.board_size * self.square_size + 50)
         self.screen.bgcolor('white')
-        self.screen.title('Othello')
+        self.screen.title('Othello- low mist')
         self.pen = turtle.Turtle()
         self.pen.hideturtle()
         self.pen.speed(0)
@@ -221,7 +221,6 @@ class Othello:
 
     def play(self):
         winner = None
-        none_count = 0
         while not self.terminal_test():
             if self.ui:
                 self.ui.draw_board(self.board)
@@ -237,18 +236,7 @@ class Othello:
             if self.ui:
                 self.ui.draw_board(self.board)
                 time.sleep(1)
-            
-            if move is None:
-                none_count += 1
-            else: 
-                none_count = 0
                 
-            if none_count >= 2:
-                print("shit")
-                
-            # global file
-            # file.write(str(self.board).encode('utf8'))
-            # file.write(f"{move}\n----------------------------------------------------------\n".encode('utf8'))
         winner = self.get_winner()
         return winner
     
@@ -260,22 +248,16 @@ class Othello:
             int(self.size / 2) - 1] = -1
         self.current_turn = random.choice([1, -1])
         
-TOTAL_TESTS = 5000
-win = 0
-# othello = Othello(True)
-# othello.set_minimax_depth(3)
-# win += othello.play()
-
+TOTAL_TESTS = 20
 othello = Othello(False)
+win = 0
 time_elapsed = 0
-othello.set_minimax_depth(3)
+othello.set_minimax_depth(7)
 
 # othello = Othello(True)
+# othello.play()
 
 for i in range(TOTAL_TESTS):
-    # file = open("file.txt", "wb")
-    # file.write(f"---------------------{i}------------------------\n".encode('utf8'))
-    # othello.board = [[1, -1, -1, 1, 1, 1], [1, -1, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1], [0, 1, 1, 1, 1, 1], [1, 1, 0, 1, 1, 0], [1, 1, 1, 1, -1, 1]]
     start = time.time()
     win += (othello.play() == HUMAN)
     time_elapsed += time.time() - start
