@@ -36,7 +36,7 @@ for i, sample in enumerate(samples):
     plt.subplot(2, 5, i + 1)
     plt.imshow(sample, cmap="gray")
     plt.axis("off")
-    
+
 plt.suptitle("Training Data")
 plt.show()
 
@@ -46,7 +46,7 @@ for i, sample in enumerate(samples):
     plt.subplot(2, 5, i + 1)
     plt.imshow(sample, cmap="gray")
     plt.axis("off")
-    
+
 plt.suptitle("Testing Data")
 plt.show()
 CLASSES = range(10)
@@ -85,7 +85,7 @@ plt.show()
 train_data = [[i / 255 for i in row] for row in train_data]
 test_data = [[i / 255 for i in row] for row in test_data]
 # A better way to do this is to use the
-# sklearn.preprocessing.MinMaxScaler() 
+# sklearn.preprocessing.MinMaxScaler()
 # but we are not allowed to do that
 train_data = np.array(train_data)
 train_data = train_data.reshape(train_data.shape[0], -1)
@@ -105,3 +105,42 @@ for i in CLASSES:
     class_probability[i] = len(class_indices) / len(train_data)
     mean[i] = class_indices.mean(axis=0)
     variance[i] = class_indices.var(axis=0)
+
+
+def predict_Gaussian(x):
+    log_prob = np.zeros(NUMBER_OF_CLASSES)
+    for i in CLASSES:
+        log_prob[i] = np.log(class_probability[i])
+        log_prob[i] += np.sum(np.log(np.sqrt(2 * np.pi * variance[i])))
+        log_prob[i] -= np.sum((x - mean[i]) ** 2 / (2 * variance[i]))
+    return np.argmax(log_prob)
+
+y_pred = [predict_Gaussian(x) for x in test_data]
+print(classification_report(test_labels, y_pred))
+
+
+
+THRESHOLD = 0.5
+
+train_data_bool = np.where(train_data > THRESHOLD, 1, 0)
+test_data_bool = np.where(test_data > THRESHOLD, 1, 0)
+
+pixel_prob = np.zeros([NUMBER_OF_CLASSES, NUMBER_OF_PIXELS, 2])
+for i in CLASSES:
+    class_indices = np.where(train_labels == i)[0]
+    class_data = train_data_bool[class_indices]
+    pixel_prob[i, :, 1] = np.sum(class_data, axis=0) / len(class_data)
+    pixel_prob[i, :, 0] = 1 - pixel_prob[i, :, 1]
+
+
+def predict_Bernoulli(x):
+    log_prob = np.zeros(NUMBER_OF_CLASSES)
+    for i in CLASSES:
+        log_prob[i] = np.log(class_probability[i])
+        for j in range(NUMBER_OF_PIXELS):
+            log_prob[i] += np.log(pixel_prob[i, j, x[j]])
+    return np.argmax(log_prob)
+
+
+y_pred = [predict_Bernoulli(x) for x in test_data_bool]
+print(classification_report(test_labels, y_pred))
