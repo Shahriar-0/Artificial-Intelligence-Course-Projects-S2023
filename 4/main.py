@@ -115,9 +115,9 @@ def predict_Gaussian(x):
         log_prob[i] -= np.sum((x - mean[i]) ** 2 / (2 * variance[i]))
     return np.argmax(log_prob)
 
+
 y_pred = [predict_Gaussian(x) for x in test_data]
 print(classification_report(test_labels, y_pred))
-
 
 
 THRESHOLD = 0.5
@@ -133,14 +133,47 @@ for i in CLASSES:
     pixel_prob[i, :, 0] = 1 - pixel_prob[i, :, 1]
 
 
-def predict_Bernoulli(x):
+ALPHA = 1
+
+variance_with_additive_smoothing = variance + ALPHA
+class_probability_with_additive_smoothing = [0 for _ in range(NUMBER_OF_CLASSES)]
+
+for i in CLASSES:
+    class_indices = train_data[train_labels == i]
+    class_probability_with_additive_smoothing[i] = (len(class_indices) + ALPHA) / (
+        len(train_data) + ALPHA * len(CLASSES)
+    )
+
+
+def predict_Gaussian_with_additive_smoothing(x):
+    log_prob = np.zeros(NUMBER_OF_CLASSES)
+    for i in CLASSES:
+        log_prob[i] = np.log(class_probability_with_additive_smoothing[i])
+        log_prob[i] += np.sum(
+            np.log(np.sqrt(2 * np.pi * variance_with_additive_smoothing[i]))
+        )
+        log_prob[i] -= np.sum(
+            (x - mean[i]) ** 2 / (2 * variance_with_additive_smoothing[i])
+        )
+    return np.argmax(log_prob)
+
+
+pixel_prob_with_additive_smoothing = np.zeros([NUMBER_OF_CLASSES, NUMBER_OF_PIXELS, 2])
+for i in CLASSES:
+    class_indices = np.where(train_labels == i)[0]
+    class_data = train_data_bool[class_indices]
+    pixel_prob_with_additive_smoothing[i, :, 1] = (
+        np.sum(class_data, axis=0) + ALPHA
+    ) / (len(class_data) + 2 * ALPHA)
+    pixel_prob_with_additive_smoothing[i, :, 0] = (
+        1 - pixel_prob_with_additive_smoothing[i, :, 1]
+    )
+
+
+def predict_Bernoulli_with_additive_smoothing(x):
     log_prob = np.zeros(NUMBER_OF_CLASSES)
     for i in CLASSES:
         log_prob[i] = np.log(class_probability[i])
         for j in range(NUMBER_OF_PIXELS):
-            log_prob[i] += np.log(pixel_prob[i, j, x[j]])
+            log_prob[i] += np.log(pixel_prob_with_additive_smoothing[i, j, x[j]])
     return np.argmax(log_prob)
-
-
-y_pred = [predict_Bernoulli(x) for x in test_data_bool]
-print(classification_report(test_labels, y_pred))
