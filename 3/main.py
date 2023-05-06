@@ -267,7 +267,7 @@ class Othello:
             self.current_turn = -self.current_turn
             if self.ui:
                 self.ui.draw_board(self.board)
-                # time.sleep(1)
+                time.sleep(1)
 
         winner = self.get_winner()
         print(self.seen_nodes)
@@ -309,6 +309,7 @@ class Othello:
 
 
 othello = Othello()
-othello.test(
-    depth=5,
-)
+othello.play()
+# othello.test(
+#     depth=5,
+# )
