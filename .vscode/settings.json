@@ -91,5 +91,8 @@
         "variant": "cpp",
         "*.rmd": "markdown",
         "xstring": "cpp"
-    }
+    },
+    "cSpell.words": [
+        "Scikit"
+    ]
 }
