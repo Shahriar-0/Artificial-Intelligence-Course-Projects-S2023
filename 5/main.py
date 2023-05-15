@@ -190,6 +190,29 @@ def get_regression_predictions(input_feature, intercept, slope):
 
     return predicted_values
 
+# def simple_linear_regression(input_feature, output):
+#     # create a matrix of input features with an additional column of ones for the intercept
+#     X = np.vstack((input_feature, np.ones(len(input_feature)))).T
+
+#     # use np.linalg to solve for the coefficients
+#     coefficients = np.linalg.lstsq(X, output, rcond=None)[0]
+
+#     # extract the slope and intercept from the coefficients
+#     slope = coefficients[0]
+#     intercept = coefficients[1]
+
+#     return (intercept, slope)
+
+# def get_regression_predictions(input_feature, intercept, slope):
+#     # create a matrix of input features with an additional column of ones for the intercept
+#     X = np.vstack((input_feature, np.ones(len(input_feature)))).T
+
+#     # use the coefficients to make predictions
+#     predicted_values = np.dot(X, [slope, intercept])
+
+#     return predicted_values
+
+
 def get_root_mean_square_error(predicted_values, output):
     # Compute the residuals (since we are squaring it doesn't matter which order you subtract)
     residuals = output - predicted_values
