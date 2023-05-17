@@ -11,10 +11,10 @@ from tqdm import tqdm
 from time import time
 from copy import deepcopy
 
-with open("./assets/data.pkl", "rb") as f:
+with open("./assets/data/data.pkl", "rb") as f:
     data = pickle.load(f)
 
-with open("./assets/label.pkl", "rb") as f:
+with open("./assets/data/label.pkl", "rb") as f:
     labels = pickle.load(f)
 
 data_resized = [cv2.resize(img, (20, 20)) for img in data]

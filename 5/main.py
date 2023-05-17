@@ -19,7 +19,7 @@ from sklearn.metrics import ConfusionMatrixDisplay
 import category_encoders as cat_enc
 from mlxtend.evaluate import bias_variance_decomp
 
-DATASET_PATH = "assets/house_data.csv"
+DATASET_PATH = "assets/data/house_data.csv"
 
 df = pd.read_csv(DATASET_PATH)
 pd.set_option("display.max_columns", None)
