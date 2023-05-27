@@ -40,12 +40,15 @@ from tensorflow import keras
 ## torch
 import torch
 from torch import nn
+from torch.nn import ReLU, Sigmoid, Linear
 from torch.optim import Adam
 from torch.utils.data import TensorDataset, DataLoader
+from torch.autograd import grad
 
 # utils
 import os
 from tqdm import tqdm
+
 stopwords = set(stopwords.words('english'))
 
 X, Y = make_moons(n_samples=2000, noise=0.1)
@@ -64,14 +67,11 @@ plot_data(ax, X, Y)
 plt.show()
 
 xx, yy = np.meshgrid(np.arange(x_min, x_max, 0.1), np.arange(y_min, y_max, 0.1))
-
 to_forward = np.array(list(zip(xx.ravel(), yy.ravel())))
 
-def plot_decision_boundary(ax: Axes, X, Y, classifier: Union["MyReLU", "MySigmoid"]):
-
+def plot_decision_boundary(ax: Axes, X, Y, classifier):
     Z = classifier.forward(to_forward)
     Z = Z.reshape(xx.shape)
-
     ax.contourf(xx, yy, Z > 0.5, cmap="Blues")
     plot_data(ax, X, Y)
     
@@ -112,14 +112,19 @@ class MyLinear(object):
         self.b = np.random.randn(n_output)
 
     def forward(self, x: NDArray):
-        self.x = x.copy()
+        self.x = x
         return np.dot(x, self.W) + self.b
 
     def backward(self, grad_output):
-        dW = np.outer(self.x, grad_output)
-        db = grad_output
+        if self.x.ndim == 1:
+            self.dW = np.outer(self.x, grad_output)
+        else:
+            self.dW = np.dot(self.x.T, grad_output)
+        
+        self.db = np.sum(grad_output, axis=0)
         dx = np.dot(grad_output, self.W.T)
-        return dx, dW, db
+        
+        return dx
         
     def step(self, learning_rate):
         self.W -= learning_rate * self.dW
@@ -146,40 +151,36 @@ class Sequential(object):
     def backward(self):
         grad = self.grad_loss
         for layer in reversed(self.layers):
-            if isinstance(layer, MyLinear):
-                grad, dW, db = layer.backward(grad)
-                layer.dW = dW
-                layer.db = db
-            else:
-                grad = layer.backward(grad)
+            grad = layer.backward(grad)
     
     def step(self, learning_rate):
         for layer in self.layers:
             layer.step(learning_rate)
-        
-model = Sequential()
-model.add_layer(MyLinear(n_input=10, n_output=5))
-model.add_layer(MyReLU())
-model.add_layer(MyLinear(n_input=5, n_output=1))
-model.add_layer(MySigmoid())
-       
+
+my_model = Sequential()
+my_model.add_layer(MyLinear(n_input=2, n_output=5))
+my_model.add_layer(MyReLU())
+my_model.add_layer(MyLinear(n_input=5, n_output=5))
+my_model.add_layer(MyReLU())
+my_model.add_layer(MyLinear(n_input=5, n_output=5))
+my_model.add_layer(MyReLU())
+my_model.add_layer(MyLinear(n_input=5, n_output=1))
+my_model.add_layer(MySigmoid())
+
 losses = []
-learning_rate = 1e-2
+learning_rate = 1e-3
 epochs = 10
 for epoch in range(epochs):
-    for it in range(len(X)):
+    epoch_loss = np.array([])
+    for _ in range(len(X)):
         idx = np.random.randint(0, len(X))
         x = X[idx]
         y = Y[idx]
-        out = model.forward(x)
-        loss = model.compute_loss(out, y)
-        losses.append(loss)
-        model.backward()
-        model.step(learning_rate)
+        out = my_model.forward(x)
+        loss = my_model.compute_loss(out, y)
+        epoch_loss = np.append(epoch_loss, loss)
+        my_model.backward()
+        my_model.step(learning_rate)
+    losses.append(np.mean(epoch_loss))
 plt.plot(losses)
 plt.show()
-fig, ax = plt.subplots(1, 1, facecolor='#4B6EA9')
-ax.set_xlim(x_min, x_max)
-ax.set_ylim(y_min, y_max)
-plot_decision_boundary(ax, X, Y, model)
-fig.canvas.draw()
