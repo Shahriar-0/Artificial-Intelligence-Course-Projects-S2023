@@ -235,3 +235,5 @@ ax.set_xlim(x_min, x_max)
 ax.set_ylim(y_min, y_max)
 plot_decision_boundary(ax, X, Y, my_model)
 fig.canvas.draw()
+
+# ------------------------------------------------------------------------------
