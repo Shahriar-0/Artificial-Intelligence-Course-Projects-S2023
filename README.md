@@ -21,8 +21,7 @@ The problem is searching a graph for recipes, and giving them to the ones who ne
 
 ## CA2: Genetic Algorithms
 
-In this project, An investment problem is solved using a genetic algorithm.  
-Given an equation of length *n* and its answer, we use genetic methods to find what combination of operands and operators satisfy the equation.
+In this project, An investment problem is solved using a genetic algorithm. We find share that we buy from each to get a good return with low risk.
 
 ## CA3: Game Minimax
 
@@ -31,15 +30,19 @@ One of them uses the *alpha-beta minimax* algorithm to play optimally, while the
 
 ## CA4: Naive Bayes
 
-In this project, the class of a numbers is predicted using an implementation of the *Naive Bayes classifier*.
+In this project, the class of a numbers is predicted using an implementation of the *Naïve Bayes classifier*. 
+We used methods like **Gaussian Naïve Bayes** and **Bernoulli Naïve Bayes** and techniques like *Additive smoothing*. 
 
 ## CA5: Machine Learning
 
 In this project, different classifiers are trained on a dataset and the models are tested.  
-A diabetes dataset is preprocessed, split, and used to train a **Decision Tree**, **K-Nearest Neighbors**, **Logistic Regression**, and **Random Forest** model to predict whether someone has diabetes.
+A home price dataset is preprocessed, split, and used to train a **Linear Regression**, **Decision Tree**, **K-Nearest Neighbors**, **Logistic Regression**, and **Random Forest** model to predict price of a house with given features.
 
 ## CA6: Neural Networks
 
-In this project, a neural network is implemented and trained to classify images of Arabic handwritten characters.  
-The feedforward neural network and various activation functions are implemented and the effects of different parameters are checked.  
-The TensorFlow library is used afterwards to classify the *CIFAR-10* dataset.
+- Phase 1: 
+      In this project, a neural network is implemented and trained to classify different datasets like sklearn.datasets.make_moons, sklearn.datasets.make_circles, sklearn.datasets.make_classification.  
+      Then we trained a model on people reviews on [imdb](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews) and used PyTorch to train a model.
+      The feedforward neural network and various activation functions are implemented and the effects of different parameters are checked.  
+- Phase 2:
+      Keras and TensorFlow library are used to classify the *CIFAR-10* dataset. different methods like **Data Augmentation** or **Regularization** are used to improve performance of our model.
