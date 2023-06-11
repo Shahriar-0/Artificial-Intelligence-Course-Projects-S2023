@@ -36,10 +36,10 @@ In this project, the class of a numbers is predicted using an implementation of 
 ## CA5: Machine Learning
 
 In this project, different classifiers are trained on a dataset and the models are tested.  
-A diabetes dataset is preprocessed, split, and used to train a **Decision Tree**, **K-Nearest Neighbors**, **Logistic Regression**, and **Random Forest** model to predict whether someone has diabetes.
+A home price dataset is preprocessed, split, and used to train a **Linear Regression**, **Decision Tree**, **K-Nearest Neighbors**, **Logistic Regression**, and **Random Forest** model to predict price of a house with given features.
 
 ## CA6: Neural Networks
 
-In this project, a neural network is implemented and trained to classify images of Arabic handwritten characters.  
+In this project, a neural network is implemented and trained to classify different datasets like sklearn.datasets.make_moons, sklearn.datasets.make_circles, sklearn.datasets.make_classification.  
 The feedforward neural network and various activation functions are implemented and the effects of different parameters are checked.  
-The TensorFlow library is used afterwards to classify the *CIFAR-10* dataset.
+Then we use keras and TensorFlow library classify the *CIFAR-10* dataset.
