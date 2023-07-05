@@ -12,7 +12,6 @@
 ## CA0: Introduction
 
 In this project, we are introduced to *exploratory data analysis* using some of the Python data science libraries such as pandas, NumPy, and matplotlib in Jupyter Notebook.  
-Using the Titanic passengers dataset, we use simple probability methods to predict whether a passenger would survive or not.
 
 ## CA1: Search Algorithms
 
