@@ -11,7 +11,7 @@
 
 ## CA0: Introduction
 
-In this project, we are introduced to *exploratory data analysis* using some of the Python data science libraries such as pandas, NumPy, and matplotlib in Jupyter Notebook.  
+In this project, we are introduced to **exploratory data analysis** using some of the Python data science libraries such as pandas, NumPy, and matplotlib in Jupyter Notebook, and try to solve [this](https://cseweb.ucsd.edu/classes/sp15/cse190-c/reports/sp15/048.pdf) problem.
 
 ## CA1: Search Algorithms
 
