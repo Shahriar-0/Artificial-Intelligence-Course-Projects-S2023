@@ -1,0 +1,9 @@
+[submodule "Archive/V1"]
+	path = Archive/V1
+	url = https://github.com/MisaghM/Artificial-Intelligence-Course-Projects.git
+[submodule "Archive/V2"]
+	path = Archive/V2
+	url = https://github.com/PashaBarahimi/Artificial-Intelligence-Projects.git
+[submodule "Archive/V3"]
+	path = Archive/V3
+	url = https://github.com/AliHamzeh2002/AI-Course-Projects.git
