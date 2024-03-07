@@ -7,3 +7,6 @@
 [submodule "Archive/V3"]
 	path = Archive/V3
 	url = https://github.com/AliHamzeh2002/AI-Course-Projects.git
+[submodule "Genetic-Archive"]
+	path = Genetic-Archive
+	url = https://github.com/Shahriar-0/Genetic-Algorithm.git
